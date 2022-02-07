@@ -64,7 +64,6 @@ Run command below to see list of available make commands
 ~$ make
 
 /--- Flashcard -------------------------------------------------------/
-build           Build the containers
 env             Create .env file
 migrate         Run the migrations
 up              Create and start containers

@@ -1,6 +1,5 @@
 help:
 	@echo "/--- Flashcard -------------------------------------------------------/";
-	@echo "build		Build the containers"
 	@echo "env  		Create .env file"
 	@echo "migrate  	Run the migrations"
 	@echo "up	        Create and start containers"
@@ -8,14 +7,6 @@ help:
 	@echo "run      	Start application"
 	@echo "test     	Run all the application tests"
 	@echo "/-----------------------------------------------------------------/";
-
-build:
-	docker run --rm \
-        -u "$(id -u):$(id -g)" \
-        -v $(pwd):/var/www/html \
-        -w /var/www/html \
-        laravelsail/php81-composer:latest \
-        composer install --ignore-platform-reqs
 
 env:
 	cp .env.example .env
