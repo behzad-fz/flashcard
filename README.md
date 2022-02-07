@@ -66,6 +66,7 @@ Run command below to see list of available make commands
 /--- Flashcard -------------------------------------------------------/
 build           Build the containers
 env             Create .env file
+migrate         Run the migrations
 up              Create and start containers
 destroy         Stop and remove containers
 run             Start application

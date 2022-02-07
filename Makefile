@@ -2,6 +2,7 @@ help:
 	@echo "/--- Flashcard -------------------------------------------------------/";
 	@echo "build		Build the containers"
 	@echo "env  		Create .env file"
+	@echo "migrate  	Run the migrations"
 	@echo "up	        Create and start containers"
 	@echo "destroy		Stop and remove containers"
 	@echo "run      	Start application"
@@ -18,6 +19,9 @@ build:
 
 env:
 	cp .env.example .env
+
+migrate:
+	./vendor/bin/sail artisan migrate
 
 up:
 	./vendor/bin/sail up
