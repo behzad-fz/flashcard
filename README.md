@@ -34,6 +34,8 @@
     composer install --ignore-platform-reqs
 
 ~$ ./vendor/bin/sail up
+
+~$ ./vendor/bin/sail artisan migrate
 ```
 
 ### Usage
