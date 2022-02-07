@@ -1,66 +1,99 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Flashcard
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+- [Services](#services) What Dev offers
+- [Requirements](#requirements) What are the requirements to use this dockerized playground
+- [Installation](#installation) How to create and start
+- [Usage](#usage) instructions to use application
+- [Run Tests](#run-tests) How to run tests (PHPUnit)
+- [Shortcuts](#shortcuts) Use shortcut commands (Makefile)
+- [Assumptions](#Assumptions) Assumptions
 
-## About Laravel
+### Services
+- PHP 8.1
+- Mysql 8
+- Redis
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Requirements
+- Docker
+- Docker Compose
+- Make
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Installation
+```
+~$ git clone https://github.com/behzad-fz/flashcard.git
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+~$ cd flashcard
 
-## Learning Laravel
+~$ cp .env.example .env
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+~$ docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v $(pwd):/var/www/html \
+    -w /var/www/html \
+    laravelsail/php81-composer:latest \
+    composer install --ignore-platform-reqs
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+~$ ./vendor/bin/sail up
+```
 
-## Laravel Sponsors
+### Usage
+You can start the application by running the following commands:
+```
+~$ ./vendor/bin/sail artisan flashcard:interactive
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Run Tests
+You can run tests by entering the following command:
+```
+~$ ./vendor/bin/sail artisan test
+OR
+~$ ./vendor/bin/phpunit
 
-### Premium Partners
+Notice: I put ->expectsQuestion('What do you want to do?', 'Exit')->assertExitCode(0);
+        at the end of every test because the flashcard application is an ongoing process until user
+        terminates it, so if i don't close the app in every test it will be in an infinite loop and 
+        tests would fail even though they are asserting as expected.
+```
+### Shortcuts
+You can also use 'make' command as a shortcut.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-- **[Romega Software](https://romegasoftware.com)**
+Run command below to see list of available make commands
+```
+~$ make
 
-## Contributing
+/--- Flashcard -------------------------------------------------------/
+build           Build the containers
+env             Create .env file
+up              Create and start containers
+destroy         Stop and remove containers
+run             Start application
+test            Run all the application tests
+/-----------------------------------------------------------------/
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+EX:
+    ~$ make test
+        is equal to 
+    ~$ ./vendor/bin/sail artisan test
+```
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+### Assumptions
+These are the things it wasn't clear, so I had to assume
+```
+1 - In the assignment PDF it says "store the answer in the DB and print correct/incorrect."
+    I assume by this you mean store the status, not the answer user gives since i don't see 
+    any option to check the history of user's answers.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+ 
+2 - Taking multi-users mode into consideration, it there should be a n to n relation between user
+    and flashcard. I even added the table but since you explicitly mentioned in the assignment PDF
+     that "When we say “users”, we don’t actually mean that you should have a user model", So i avoid
+     using a user model and a relation between them and kept it simple in the flashcards table.
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+3- It would be perfect to have a delete option, in case user creates a flashcard and they want to get 
+    rid of it.(Even a update option). I only avoid it because it wasn't mentioned in the assignment PDF.
+```
+
+
