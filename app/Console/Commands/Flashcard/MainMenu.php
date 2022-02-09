@@ -5,6 +5,7 @@ namespace App\Console\Commands\Flashcard;
 use App\Factories\MenuFactory;
 use App\Interfaces\FlashcardServiceInterface;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 
 class MainMenu extends Command
 {
@@ -36,8 +37,6 @@ class MainMenu extends Command
         'Exit',
     ];
 
-    private MenuFactory $factory;
-
     /**
      * Create a new command instance.
      *
@@ -46,7 +45,6 @@ class MainMenu extends Command
     public function __construct(
         private FlashcardServiceInterface $flashcardService
     ) {
-        $this->factory = new MenuFactory($this);
         parent::__construct();
     }
 
@@ -55,14 +53,15 @@ class MainMenu extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
+        $this->login();
+
         system('clear');
 
         while ('Exit' !== $choice = $this->choice('What do you want to do?', $this->menuItems,2,5)) {
             system('clear');
-            $subMenu = $this->factory->make($choice);
-            $subMenu->handle();
+            MenuFactory::make($choice, $this)->handle();
         }
 
         return 0;
@@ -71,5 +70,10 @@ class MainMenu extends Command
     public function getFlashcardService(): FlashcardServiceInterface
     {
         return $this->flashcardService;
+    }
+
+    private function login(): void
+    {
+        Auth::login($this->flashcardService->getDefaultUser());
     }
 }

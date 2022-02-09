@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Flashcard;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 
 class Stats extends Command
 {
@@ -40,7 +41,7 @@ class Stats extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $this->parent->table(
             ['Metrics', 'Statistics'],
@@ -51,11 +52,11 @@ class Stats extends Command
                 ],
                 [
                     'key' => 'Answered Questions',
-                    'value' => sprintf('%s %%', $this->parent->getFlashcardService()->getAnsweredCardsPercentage())
+                    'value' => sprintf('%s %%', $this->parent->getFlashcardService()->getAnsweredCardsPercentage(Auth::user()))
                 ],
                 [
                     'key' => 'Correctly Answered Questions',
-                    'value' => sprintf('%s %%', $this->parent->getFlashcardService()->getCorrectlyAnsweredCardsPercentage())
+                    'value' => sprintf('%s %%', $this->parent->getFlashcardService()->getCorrectlyAnsweredCardsPercentage(Auth::user()))
                 ]
             ]
         );

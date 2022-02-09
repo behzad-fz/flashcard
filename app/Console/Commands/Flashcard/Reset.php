@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Flashcard;
 
-use App\Models\Flashcard;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 
 class Reset extends Command
 {
@@ -47,11 +47,11 @@ class Reset extends Command
 
         $this->parent->line('Report of what you have done so far:');
         $this->parent->line(sprintf('Total Number Of Questions : %s', $this->parent->getFlashcardService()->totalCount()));
-        $this->parent->line(sprintf('Answered : %s %%', $this->parent->getFlashcardService()->getAnsweredCardsPercentage()));
-        $this->parent->line(sprintf('Answered Correctly : %s %%', $this->parent->getFlashcardService()->getCorrectlyAnsweredCardsPercentage()));
+        $this->parent->line(sprintf('Answered : %s %%', $this->parent->getFlashcardService()->getAnsweredCardsPercentage(Auth::user())));
+        $this->parent->line(sprintf('Answered Correctly : %s %%', $this->parent->getFlashcardService()->getCorrectlyAnsweredCardsPercentage(Auth::user())));
 
         if ($this->parent->confirm('Do you wish to continue resetting the process?')) {
-            $this->parent->getFlashcardService()->resetProgress();
+            $this->parent->getFlashcardService()->resetProgress(Auth::user());
             system('clear');
             $this->parent->info('Practice process has been reset!');
         }

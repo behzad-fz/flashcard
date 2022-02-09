@@ -4,6 +4,7 @@ namespace App\Console\Commands\Flashcard;
 
 use App\Models\Flashcard;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -43,7 +44,7 @@ class Practice extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $firstTime = true;
 
@@ -54,14 +55,14 @@ class Practice extends Command
                 $firstTime = false;
             }
 
-            if ('Q' === Str::upper($question = $this->parent->ask("press Q to quit. \n Or Pick a question to practice:")) ) {
+            if ('Q' === Str::upper($cardId = $this->parent->ask("press Q to quit. \n Or Pick a question to practice:")) ) {
                 system('clear');
                 break;
             }
 
             $validator = Validator::make(
                 [
-                    'id' => $question
+                    'id' => $cardId
                 ],
                 [
                     'id' => 'required|numeric',
@@ -76,26 +77,25 @@ class Practice extends Command
                 continue;
             }
 
-            if ($this->parent->getFlashcardService()->isAnsweredCorrectlyBefore($question)) {
+            if ($this->parent->getFlashcardService()->isAnsweredCorrectlyBefore($cardId, Auth::user())) {
                 system('clear');
                 $this->printTable();
                 $this->parent->error('You already answer that correctly! Pick another one!');
                 continue;
             }
 
-            if (! $q = $this->parent->getFlashcardService()->find($question)) {
-                $this->parent->error(sprintf('Flashcard with id %s does not exist!', $question));
+            if (! $flashcard = $this->parent->getFlashcardService()->find($cardId)) {
+                $this->parent->error(sprintf('Flashcard with id %s does not exist!', $cardId));
                 continue;
             }
 
-            if ($q->answer === $this->parent->ask('Write your answer:')) {
-                $this->parent->getFlashcardService()->updateStatus($question, Flashcard::STATUS_CORRECT);
+            if ($flashcard->answer === $this->parent->ask('Write your answer:')) {
+                $this->parent->getFlashcardService()->updateStatus($cardId, Flashcard::STATUS_CORRECT, Auth::user());
                 system('clear');
-
                 $this->printTable();
                 $this->parent->info('Bravo! Correct');
             } else {
-                $this->parent->getFlashcardService()->updateStatus($question, Flashcard::STATUS_INCORRECT);
+                $this->parent->getFlashcardService()->updateStatus($cardId, Flashcard::STATUS_INCORRECT, Auth::user());
                 system('clear');
                 $this->printTable();
                 $this->parent->error('Sorry! Incorrect');
@@ -105,12 +105,13 @@ class Practice extends Command
         return 0;
     }
 
-    private function printTable()
+    private function printTable(): void
     {
         $this->parent->table(
             ['#', 'Questions', 'Status'],
-            $this->parent->getFlashcardService()->getAllCard(['id','question', 'status'])
+            $this->parent->getFlashcardService()->getAllCardsWithCurrentUserStatus(Auth::id())
         );
-        $this->parent->line(sprintf("%s %% Completed", $this->parent->getFlashcardService()->getProgressPercentage()));
+
+        $this->parent->line(sprintf("%s %% Completed", $this->parent->getFlashcardService()->getCorrectlyAnsweredCardsPercentage(Auth::user())));
     }
 }

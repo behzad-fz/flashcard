@@ -41,7 +41,7 @@ class CreateAFlashcard extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         $question = $this->askForQuestion();
         $answer = $this->askForAnswer();
@@ -55,7 +55,7 @@ class CreateAFlashcard extends Command
         return 0;
     }
 
-    private function askForQuestion()
+    private function askForQuestion(): string
     {
         do {
             $question = $this->parent->ask('Enter the question');
@@ -65,7 +65,7 @@ class CreateAFlashcard extends Command
                     'question'  => $question,
                 ],
                 [
-                'question' => 'required|min:3',
+                    'question' => 'required|min:3',
                 ]
             );
 
@@ -78,7 +78,7 @@ class CreateAFlashcard extends Command
         return $question;
     }
 
-    private function askForAnswer()
+    private function askForAnswer(): string
     {
         do {
             $answer = $this->parent->ask('Enter the answer');
