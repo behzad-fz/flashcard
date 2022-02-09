@@ -17,7 +17,6 @@ class CreateFlashcardsTable extends Migration
             $table->id();
             $table->string('question');
             $table->text('answer');
-            $table->enum('status',['Not Answered', 'Correct', 'Incorrect'])->default('Not Answered');
             $table->timestamps();
         });
     }
