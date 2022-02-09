@@ -36,6 +36,8 @@
 ~$ ./vendor/bin/sail up
 
 ~$ ./vendor/bin/sail artisan migrate
+
+~$ ./vendor/bin/sail artisan db:seed
 ```
 
 ### Usage
@@ -66,6 +68,7 @@ Run command below to see list of available make commands
 /--- Flashcard -------------------------------------------------------/
 env             Create .env file
 migrate         Run the migrations
+seed            Run the seeders
 up              Create and start containers
 destroy         Stop and remove containers
 run             Start application
@@ -78,8 +81,6 @@ EX:
     ~$ ./vendor/bin/sail artisan test
 ```
 
-
-
 ### Assumptions
 These are the things it wasn't clear, so I had to assume
 ```
@@ -87,14 +88,7 @@ These are the things it wasn't clear, so I had to assume
     I assume by this you mean store the status, not the answer user gives since i don't see 
     any option to check the history of user's answers.
 
- 
-2 - Taking multi-users mode into consideration, it there should be a n to n relation between user
-    and flashcard. I even added the table but since you explicitly mentioned in the assignment PDF
-     that "When we say “users”, we don’t actually mean that you should have a user model", So i avoid
-     using a user model and a relation between them and kept it simple in the flashcards table.
-
-
-3- It would be perfect to have a delete option, in case user creates a flashcard and they want to get 
+2 - It would be perfect to have a delete option, in case user creates a flashcard and they want to get 
     rid of it.(Even a update option). I only avoid it because it wasn't mentioned in the assignment PDF.
 ```
 
