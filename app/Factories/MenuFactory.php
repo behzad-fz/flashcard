@@ -3,23 +3,19 @@
 namespace App\Factories;
 
 use Illuminate\Support\Str;
+use Illuminate\Console\Command;
 
 class MenuFactory
 {
-    private $parent;
-    public function __construct($parent)
+    public static function make(string $subMenuName, Command $mainMenu): Command
     {
-        $this->parent = $parent;
-    }
-    public function make($name)
-    {
-        $explode = explode(' ', $name);
+        $explode = explode(' ', $subMenuName);
 
         $class = "App\Console\Commands\Flashcard\\";
         foreach ($explode as $e) {
             $class .= Str::ucfirst($e);
         }
 
-        return new $class($this->parent);
+        return new $class($mainMenu);
     }
 }
