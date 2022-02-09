@@ -2,6 +2,7 @@ help:
 	@echo "/--- Flashcard -------------------------------------------------------/";
 	@echo "env  		Create .env file"
 	@echo "migrate  	Run the migrations"
+	@echo "seed       	Run the seeders"
 	@echo "up	        Create and start containers"
 	@echo "destroy		Stop and remove containers"
 	@echo "run      	Start application"
@@ -13,6 +14,9 @@ env:
 
 migrate:
 	./vendor/bin/sail artisan migrate
+
+seed:
+	./vendor/bin/sail artisan db:seed
 
 up:
 	./vendor/bin/sail up
