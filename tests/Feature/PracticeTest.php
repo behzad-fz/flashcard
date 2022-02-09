@@ -3,12 +3,23 @@
 namespace Tests\Feature;
 
 use App\Models\Flashcard;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class PracticeTest extends TestCase
 {
     use DatabaseMigrations;
+
+    private User $user;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::where('email', 'default-user@system.com')->first();
+        $this->actingAs($this->user);
+    }
 
     /**
      * Test when choose 3nd option, show the progress table with each questions status.
@@ -87,9 +98,9 @@ class PracticeTest extends TestCase
      */
     public function test_show_user_an_error_message_if_the_question_has_been_answered_before()
     {
-        $question = Flashcard::factory()->create([
-            'status' => "Correct"
-        ]);
+        $flashcard = Flashcard::factory()->create();
+
+        $this->user->cards()->attach($flashcard, ['status' => "Correct"]);
 
         $this->artisan('flashcard:interactive')
             ->expectsChoice('What do you want to do?','Practice', [
@@ -100,7 +111,7 @@ class PracticeTest extends TestCase
                 'Reset',
                 'Exit',
             ])
-            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $question->id)
+            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $flashcard->id)
             ->expectsOutput('You already answer that correctly! Pick another one!')
             ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", 'Q')
             ->expectsQuestion('What do you want to do?', 'Exit')
@@ -115,7 +126,7 @@ class PracticeTest extends TestCase
      */
     public function test_ask_user_to_answer_the_question_if_question_has_not_been_answered_correctly_before()
     {
-        $question = Flashcard::factory()->create();
+        $flashcard = Flashcard::factory()->create();
 
         $this->artisan('flashcard:interactive')
             ->expectsChoice('What do you want to do?','Practice', [
@@ -126,7 +137,7 @@ class PracticeTest extends TestCase
                 'Reset',
                 'Exit',
             ])
-            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $question->id)
+            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $flashcard->id)
             ->expectsQuestion('Write your answer:', 'does not matter!')
             ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", 'Q')
             ->expectsQuestion('What do you want to do?', 'Exit')
@@ -141,9 +152,8 @@ class PracticeTest extends TestCase
      */
     public function test_show_user_an_error_message_if_given_answer_is_wrong()
     {
-        $question = Flashcard::factory()->create([
+        $flashcard = Flashcard::factory()->create([
             'answer' => "Correct Answer",
-            'status' => "Not Answered"
         ]);
 
         $this->artisan('flashcard:interactive')
@@ -155,7 +165,7 @@ class PracticeTest extends TestCase
                 'Reset',
                 'Exit',
             ])
-            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $question->id)
+            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $flashcard->id)
             ->expectsQuestion('Write your answer:', 'Wrong answer')
             ->expectsOutput('0 % Completed')
             ->expectsOutput('Sorry! Incorrect')
@@ -163,9 +173,10 @@ class PracticeTest extends TestCase
             ->expectsQuestion('What do you want to do?', 'Exit')
             ->assertExitCode(0);
 
-        $question->refresh();
+        $flashcard->refresh();
 
-        $this->assertEquals('Incorrect', $question->status);
+        $flashcardStatus = $this->user->cards()->wherePivot('flashcard_id', $flashcard->id)->first()->pivot->status;
+        $this->assertEquals('Incorrect', $flashcardStatus);
     }
 
     /**
@@ -176,9 +187,8 @@ class PracticeTest extends TestCase
      */
     public function test_show_user_a_success_message_if_given_answer_is_correct()
     {
-        $question = Flashcard::factory()->create([
+        $flashcard = Flashcard::factory()->create([
             'answer' => "Correct Answer",
-            'status' => "Not Answered"
         ]);
 
         $this->artisan('flashcard:interactive')
@@ -190,7 +200,7 @@ class PracticeTest extends TestCase
                 'Reset',
                 'Exit',
             ])
-            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $question->id)
+            ->expectsQuestion("press Q to quit. \n Or Pick a question to practice:", $flashcard->id)
             ->expectsQuestion('Write your answer:', 'Correct Answer')
             ->expectsOutput('100 % Completed')
             ->expectsOutput('Bravo! Correct')
@@ -199,8 +209,9 @@ class PracticeTest extends TestCase
             ->assertExitCode(0);
 
 
-        $question->refresh();
+        $flashcard->refresh();
 
-        $this->assertEquals('Correct', $question->status);
+        $flashcardStatus = $this->user->cards()->wherePivot('flashcard_id', $flashcard->id)->first()->pivot->status;
+        $this->assertEquals('Correct', $flashcardStatus);
     }
 }

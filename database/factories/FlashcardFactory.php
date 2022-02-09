@@ -14,8 +14,8 @@ class FlashcardFactory extends Factory
     public function definition()
     {
         return [
-            'question' => $this->faker->text(),
-            'answer' => $this->faker->text(),
+            'question' => $this->faker->text(50),
+            'answer' => $this->faker->text(50),
         ];
     }
 }

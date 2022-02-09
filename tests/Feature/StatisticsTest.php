@@ -3,12 +3,23 @@
 namespace Tests\Feature;
 
 use App\Models\Flashcard;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class StatisticsTest extends TestCase
 {
     use DatabaseMigrations;
+
+    private User $user;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::where('email', 'default-user@system.com')->first();
+        $this->actingAs($this->user);
+    }
 
     /**
      * Test when choose 4nd option, a table appears containing statistics.
@@ -36,11 +47,11 @@ class StatisticsTest extends TestCase
                 ],
                 [
                     'key' => 'Answered Questions',
-                    'value' => ((Flashcard::where('status', '!=', 'Not Answered')->count() > 0 ? Flashcard::where('status', '!=', 'Not Answered')->count() / Flashcard::count()  : 0) * 100).' %'
+                    'value' => round(($this->user->answeredCards()->count() > 0 ? $this->user->answeredCards()->count() / Flashcard::count()  : 0) * 100, 1).' %'
                 ],
                 [
                     'key' => 'Correctly Answered Questions',
-                    'value' => ((Flashcard::where('status', 'Correct')->count() > 0 ? Flashcard::where('status', 'Correct')->count() / Flashcard::count()  : 0) * 100).' %'
+                    'value' => round(($this->user->correctlyAnsweredCards()->count() > 0 ? $this->user->correctlyAnsweredCards()->count() / Flashcard::count()  : 0) * 100, 1).' %'
                 ]
             ])
             ->expectsQuestion('What do you want to do?', 'Exit')
