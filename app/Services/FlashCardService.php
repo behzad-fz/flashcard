@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Interfaces\FlashcardServiceInterface;
 use App\Models\Flashcard;
+use App\Models\User;
 
 class FlashCardService implements FlashcardServiceInterface
 {
-    public function createNewCard(string $question, string $answer)
+    public function createNewCard(string $question, string $answer): void
     {
         Flashcard::create([
             'question' => $question,
@@ -15,19 +16,19 @@ class FlashCardService implements FlashcardServiceInterface
         ]);
     }
 
-    public function getAllCard(array $columns)
+    public function getAllCard(array $columns): array
     {
         return Flashcard::all($columns)->toArray();
     }
 
-    public function getProgressPercentage(): float
+    public function getAllCardsWithCurrentUserStatus(int $userId): array
     {
-        return round((Flashcard::where('status', 'Correct')->count() > 0 ? Flashcard::where('status', 'Correct')->count() / Flashcard::count()  : 0) * 100, 1);
+        return Flashcard::getAllWithCurrentUserStatus($userId)->get()->toArray();
     }
 
-    public function isAnsweredCorrectlyBefore(string $question): bool
+    public function isAnsweredCorrectlyBefore(int $flashcardId, User $user): bool
     {
-        return (bool)Flashcard::query()->where('id', $question)->where('status', 'Correct')->first();
+        return $user->hasAnsweredCorrectlyBefore($flashcardId);
     }
 
     public function find(string $question): Flashcard|null
@@ -35,9 +36,9 @@ class FlashCardService implements FlashcardServiceInterface
         return Flashcard::find($question);
     }
 
-    public function updateStatus(string $question, string $status)
+    public function updateStatus(int $cardId, string $status, User $user): void
     {
-        return $this->find($question)->update(['status' => $status]);
+        $user->cards()->syncWithoutDetaching([$cardId => ['status' => $status]]);
     }
 
     public function totalCount(): int
@@ -45,18 +46,34 @@ class FlashCardService implements FlashcardServiceInterface
         return Flashcard::count();
     }
 
-    public function getAnsweredCardsPercentage(): float
+    public function getAnsweredCardsPercentage(User $user): float
     {
-        return round((Flashcard::where('status', '!=', 'Not Answered')->count() > 0 ? Flashcard::where('status', '!=', 'Not Answered')->count() / Flashcard::count()  : 0) * 100, 1);
+        $answered = $user->answeredCards()->count();
+
+        return round(($answered > 0 ? $answered / Flashcard::count()  : 0) * 100, 1);
     }
 
-    public function getCorrectlyAnsweredCardsPercentage(): float
+    public function getCorrectlyAnsweredCardsPercentage(User $user): float
     {
-        return round((Flashcard::where('status', 'Correct')->count() > 0 ? Flashcard::where('status', 'Correct')->count() / Flashcard::count()  : 0) * 100, 1);
+        $corrects = $user->correctlyAnsweredCards()->count();
+
+        return round(($corrects > 0 ? $corrects / Flashcard::count()  : 0) * 100, 1);
     }
 
-    public function resetProgress(): bool
+    public function resetProgress(User $user): bool
     {
-        return Flashcard::query()->update(['status' => 'Not Answered']);
+        return $user->cards()->detach();
+    }
+
+    public function getDefaultUser(): User
+    {
+        return User::firstOrCreate(
+            ['email'  => 'default-user@system.com'],
+            [
+                'name'  => 'system default user',
+                'email'  => 'default-user@system.com',
+                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            ]
+        );
     }
 }

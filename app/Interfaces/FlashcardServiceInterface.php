@@ -3,26 +3,29 @@
 namespace App\Interfaces;
 
 use App\Models\Flashcard;
+use App\Models\User;
 
 interface FlashcardServiceInterface
 {
-    public function createNewCard(string $question, string $answer);
+    public function createNewCard(string $question, string $answer): void;
 
-    public function getAllCard(array $columns);
+    public function getAllCard(array $columns): array;
 
-    public function getProgressPercentage(): float;
+    public function getAllCardsWithCurrentUserStatus(int $userId): array;
 
-    public function isAnsweredCorrectlyBefore(string $question): bool;
+    public function isAnsweredCorrectlyBefore(int $flashcardId, User $user): bool;
 
     public function find(string $question): Flashcard|null;
 
-    public function updateStatus(string $question, string $status);
+    public function updateStatus(int $cardId, string $status, User $user): void;
 
     public function totalCount(): int;
 
-    public function getAnsweredCardsPercentage(): float;
+    public function getAnsweredCardsPercentage(User $user): float;
 
-    public function getCorrectlyAnsweredCardsPercentage(): float;
+    public function getCorrectlyAnsweredCardsPercentage(User $user): float;
 
-    public function resetProgress(): bool;
+    public function resetProgress(User $user): bool;
+
+    public function getDefaultUser(): User;
 }
