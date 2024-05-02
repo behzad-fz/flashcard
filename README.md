@@ -77,25 +77,3 @@ EX:
         is equal to 
     ~$ ./vendor/bin/sail artisan test
 ```
-
-
-
-### Assumptions
-These are the things it wasn't clear, so I had to assume
-```
-1 - In the assignment PDF it says "store the answer in the DB and print correct/incorrect."
-    I assume by this you mean store the status, not the answer user gives since i don't see 
-    any option to check the history of user's answers.
-
- 
-2 - Taking multi-users mode into consideration, it there should be a n to n relation between user
-    and flashcard. I even added the table but since you explicitly mentioned in the assignment PDF
-     that "When we say “users”, we don’t actually mean that you should have a user model", So i avoid
-     using a user model and a relation between them and kept it simple in the flashcards table.
-
-
-3- It would be perfect to have a delete option, in case user creates a flashcard and they want to get 
-    rid of it.(Even a update option). I only avoid it because it wasn't mentioned in the assignment PDF.
-```
-
-
